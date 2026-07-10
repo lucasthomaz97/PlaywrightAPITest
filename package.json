@@ -1,0 +1,23 @@
+{
+  "name": "playwrightapitest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "api/src/server.ts",
+  "scripts": {
+    "db:start": "docker compose -f docker-compose.yml up -d",
+    "db:stop": "docker compose -f docker-compose.yml down"
+  },
+  "author": "Lucas Thomaz",
+  "license": "ISC",
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.1",
+    "@types/pg": "^8.20.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.22.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2"
+  }
+}
