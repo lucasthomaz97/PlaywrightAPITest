@@ -4,8 +4,9 @@
   "description": "",
   "main": "api/src/server.ts",
   "scripts": {
-    "db:start": "docker compose -f docker-compose.yml up -d",
-    "db:stop": "docker compose -f docker-compose.yml down"
+    "server": "npx tsx api/src/server.ts",
+    "test": "playwright test",
+    "report": "playwright show-report"
   },
   "author": "Lucas Thomaz",
   "license": "ISC",
@@ -19,5 +20,8 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.23.0",
     "typescript": "^7.0.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
   }
 }
