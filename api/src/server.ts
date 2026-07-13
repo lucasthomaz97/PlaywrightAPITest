@@ -16,6 +16,10 @@ app.get('/', (_req, res) => {
   res.json({ message: 'E-commerce API' });
 });
 
+app.use((_req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
 initDb()
   .then(() => {
     app.listen(PORT, () => {
