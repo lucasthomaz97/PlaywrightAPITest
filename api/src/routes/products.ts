@@ -61,8 +61,13 @@ router.put('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, price, description } = req.body;
 
-  if (id === undefined || isNaN(Number(id)) || id.includes('.')) {
+  if (id === undefined || isNaN(Number(id)) || id.includes('.') || Number(id) < 0) {
     res.status(400).json({ error: 'Invalid product ID' });
+    return;
+  }
+
+  if (!name && !price && !description) {
+    res.status(400).json({ error: 'At least one field must be provided' });
     return;
   }
 
@@ -78,11 +83,6 @@ router.put('/:id', async (req: Request, res: Response) => {
 
   if (description !== undefined && typeof description !== 'string') {
     res.status(400).json({ error: 'Description must be a string' });
-    return;
-  }
-
-  if (!name && !price && !description) {
-    res.status(400).json({ error: 'At least one field must be provided' });
     return;
   }
 
