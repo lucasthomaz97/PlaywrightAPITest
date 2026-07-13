@@ -54,4 +54,10 @@ export class ProductsClient {
         return { response, duration };
     }
 
+    async deleteProduct(productId: any) {
+        const start = Date.now();
+        const response = await this.request.delete(`/products/${productId}`);
+        const duration = Date.now() - start;
+        return { response, duration };
+    }
 }

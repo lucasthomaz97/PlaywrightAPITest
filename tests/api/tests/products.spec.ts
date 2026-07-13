@@ -5,7 +5,6 @@ import { expectCorrectResponse } from '../helpers/response_helper';
 import { expectCorrectData } from '../helpers/product_helper';
 
 test.describe('GET Products - empty', () => {
-
     test.beforeAll(async ({ request }) => {
         const productsClient: ProductsClient = new ProductsClient(request);
         await productsClient.deleteAllProducts();
@@ -213,6 +212,52 @@ test.describe('PUT Product', () => {
             const errorResponse = await response.json();
 
             expectCorrectResponse(response, 400, duration);
+            expect(errorResponse).toEqual(expectedError);
+        });
+    });
+});
+
+test.describe('DELETE Product', () => {
+    let productId: number;
+
+    test.beforeAll(async ({ request }) => {
+        const productsClient: ProductsClient = new ProductsClient(request);
+        const response = await productsClient.addProduct();
+        const product = await response.json();
+        productId = product.id;
+    });
+
+    test('should delete an existing product', async ( { request }) => {
+        const productsClient: ProductsClient = new ProductsClient(request);
+        const { response, duration } = await productsClient.deleteProduct(productId);
+        const deletedProduct = await response.json();
+
+        expectCorrectResponse(response, 200, duration);
+        expect(deletedProduct).toEqual({
+            "message": "Product deleted",
+            "product": {
+                id: productId,
+                name: expect.any(String),
+                price: expect.any(String),
+                description: expect.any(String),
+                created_at: expect.any(String)
+            }
+        });
+    });
+
+    const errorCasesTests = [
+        {"scenario": "should return 404 when deleting a non-existent product", "productId": 999999999, "errorCode": 404, "expectedError": { error: 'Product not found' }},
+        {"scenario": "should return 400 when deleting a product with invalid ID", "productId": 'invalid-id', "errorCode": 400, "expectedError": { error: 'Invalid product ID' }},
+        {"scenario": "should return 400 when deleting a product with negative ID", "productId": -1, "errorCode": 400, "expectedError": { error: 'Invalid product ID' }},
+    ];
+
+    errorCasesTests.forEach(({ scenario, productId, errorCode, expectedError }) => {
+        test(scenario, async ( { request }) => {
+            const productsClient: ProductsClient = new ProductsClient(request);
+            const { response, duration } = await productsClient.deleteProduct(productId);
+            const errorResponse = await response.json();
+
+            expectCorrectResponse(response, errorCode, duration);
             expect(errorResponse).toEqual(expectedError);
         });
     });
