@@ -9,6 +9,7 @@
     "test": "playwright test",
     "test:empty-list": "playwright test --grep \"GET Products empty list\"",
     "test:get-products": "playwright test --grep \"GET Products\"",
+    "test:get-product-by-id": "playwright test --grep \"GET Product by ID\"",
     "test:post-product": "playwright test --grep \"POST Product\"",
     "test:put-product": "playwright test --grep \"PUT Product\"",
     "test:delete-product": "playwright test --grep \"DELETE Product\""

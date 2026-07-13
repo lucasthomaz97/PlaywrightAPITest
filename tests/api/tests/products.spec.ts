@@ -53,6 +53,17 @@ test.describe('GET Products', () => {
             expectCorrectData(product);
         });
     });
+});
+
+test.describe('GET Product by ID', () => {
+    let productId: number;
+
+    test.beforeAll(async ({ request }) => {
+        const productsClient: ProductsClient = new ProductsClient(request);
+        const response = await productsClient.addProduct();
+        const product = await response.json();
+        productId = product.id;
+    });
 
     test('should return a product by ID', async ( { request }) => {
         const productsClient: ProductsClient = new ProductsClient(request);
@@ -73,24 +84,21 @@ test.describe('GET Products', () => {
         expectCorrectData(product);
     });
 
-    test('should return 404 for a non-existent product ID', async ( { request }) => {
-        const nonExistentProductId = 999999999;
-        const productsClient: ProductsClient = new ProductsClient(request);
-        const { response, duration } = await productsClient.getProductById(nonExistentProductId);
-        const errorResponse = await response.json();
+    const errorCasesTests = [
+        {"scenario": "should return 404 for a non-existent product ID", "productId": 999999999, "errorCode": 404, "expectedError": { error: 'Product not found' }},
+        {"scenario": "should return 400 for an invalid product ID", "productId": 'invalid-id', "errorCode": 400, "expectedError": { error: 'Invalid product ID' }},
+        {"scenario": "should return 404 for a negative product ID", "productId": -1, "errorCode": 404, "expectedError": { error: 'Product not found' }},
+    ];
 
-        expectCorrectResponse(response, 404, duration);
-        expect(errorResponse).toEqual({ error: 'Product not found' });
-    });
+    errorCasesTests.forEach(({ scenario, productId, errorCode, expectedError }) => {
+        test(scenario, async ( { request }) => {
+            const productsClient: ProductsClient = new ProductsClient(request);
+            const { response, duration } = await productsClient.getProductById(productId);
+            const errorResponse = await response.json();
 
-    test('should return 400 for an invalid product ID', async ( { request }) => {
-        const invalidProductId = 'invalid-id';
-        const productsClient: ProductsClient = new ProductsClient(request);
-        const { response, duration } = await productsClient.getProductById(invalidProductId as unknown as number);
-        const errorResponse = await response.json();
-
-        expectCorrectResponse(response, 400, duration);
-        expect(errorResponse).toEqual({ error: 'Invalid product ID' });
+            expectCorrectResponse(response, errorCode, duration);
+            expect(errorResponse).toEqual(expectedError);
+        });
     });
 });
 
