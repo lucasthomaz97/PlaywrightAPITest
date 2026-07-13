@@ -17,7 +17,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 
   const result = await query('SELECT * FROM products WHERE id = $1', [id]);
-  
+
   if (result.rows.length === 0) {
     res.status(404).json({ error: 'Product not found' });
     return;
@@ -60,6 +60,26 @@ router.post('/', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, price, description } = req.body;
+
+  if (id === undefined || isNaN(Number(id))) {
+    res.status(400).json({ error: 'Invalid product ID' });
+    return;
+  }
+
+  if (name !== undefined && typeof name !== 'string') {
+    res.status(400).json({ error: 'Name must be a string' });
+    return;
+  }
+
+  if (price !== undefined && (typeof price !== 'string' || isNaN(Number(price)) || Number(price) < 0)) {
+    res.status(400).json({ error: 'Price must be a numeric string' });
+    return;
+  }
+
+  if (description !== undefined && typeof description !== 'string') {
+    res.status(400).json({ error: 'Description must be a string' });
+    return;
+  }
 
   if (!name && !price && !description) {
     res.status(400).json({ error: 'At least one field must be provided' });

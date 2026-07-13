@@ -9,7 +9,8 @@
     "test": "playwright test",
     "test:empty-list": "playwright test --grep \"GET Products empty list\"",
     "test:get-products": "playwright test --grep \"GET Products\"",
-    "test:post-product": "playwright test --grep \"POST Product\""
+    "test:post-product": "playwright test --grep \"POST Product\"",
+    "test:put-product": "playwright test --grep \"PUT Product\""
   },
   "author": "Lucas Thomaz",
   "license": "ISC",
