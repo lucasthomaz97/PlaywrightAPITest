@@ -29,7 +29,7 @@ export class ProductsClient {
         return { response, duration };
     }
 
-    async postProduct(productData: { name: string; price: string; description: string }) {
+    async postProduct(productData: { name: any; price: any; description: any }) {
         const start = Date.now();
         const response = await this.request.post('/products', {
             data: productData,

@@ -5,8 +5,11 @@
   "main": "api/src/server.ts",
   "scripts": {
     "server": "npx tsx api/src/server.ts",
+    "report": "playwright show-report",
     "test": "playwright test",
-    "report": "playwright show-report"
+    "test:empty-list": "playwright test --grep \"GET Products empty list\"",
+    "test:get-products": "playwright test --grep \"GET Products\"",
+    "test:post-product": "playwright test --grep \"POST Product\""
   },
   "author": "Lucas Thomaz",
   "license": "ISC",

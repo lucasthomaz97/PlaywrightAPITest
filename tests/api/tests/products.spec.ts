@@ -71,4 +71,27 @@ test.describe('POST Product', () => {
         expect(product.price).toBe(productData.price);
         expect(product.description).toBe(productData.description);
     });
+
+    const errorCasesTests = [
+        {"scenario": "should return 400 when creating a product with missing fields", "productData": { name: '', price: '', description: '' }, "expectedError": { error: 'Name and price are required' }},
+        {"scenario": "should return 400 when creating a product with no name", "productData": { name: '', price: '29.99', description: 'This is a new product' }, "expectedError": { error: 'Name and price are required' }},
+        {"scenario": "should return 400 when creating a product with non-string name", "productData": { name: 123, price: '29.99', description: 'This is a new product' }, "expectedError": { error: 'Name must be a string' }},
+        {"scenario": "should return 400 when creating a product with no price", "productData": { name: 'Product without price', price: '', description: 'This is a new product' }, "expectedError": { error: 'Name and price are required' }},
+        {"scenario": "should return 400 when creating a product with non-numeric-string price", "productData": { name: 'Invalid Price Product', price: 'not-a-number', description: 'This product has an invalid price' }, "expectedError": { error: 'Price must be a numeric string' }},
+        {"scenario": "should return 400 when creating a product with non-string price", "productData": { name: 'Invalid Price Product', price: 123, description: 'This product has an invalid price' }, "expectedError": { error: 'Price must be a numeric string' }},
+        {"scenario": "should return 400 when creating a product with negative price", "productData": { name: 'Negative Price Product', price: '-10.00', description: 'This product has a negative price' }, "expectedError": { error: 'Price must be a numeric string' }},
+        {"scenario": "should return 400 when creating a product with non-string description", "productData": { name: 'Invalid Description Product', price: '29.99', description: 123 }, "expectedError": { error: 'Description must be a string' }}
+    ];
+
+    errorCasesTests.forEach(({ scenario, productData, expectedError }) => {
+        test(scenario, async ({ request }) => {
+            const productsClient = new ProductsClient(request);
+            const { response, duration } = await productsClient.postProduct(productData);
+            const errorResponse = await response.json();
+
+            expectSucessfulResponse(response, 400, duration);
+            expect(errorResponse).toEqual(expectedError);
+        });
+    });
+
 });

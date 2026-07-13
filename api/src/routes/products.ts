@@ -28,6 +28,21 @@ router.post('/', async (req: Request, res: Response) => {
     return;
   }
 
+  if (typeof name !== 'string') {
+    res.status(400).json({ error: 'Name must be a string' });
+    return;
+  }
+
+  if (typeof price !== 'string' || isNaN(Number(price)) || Number(price) < 0) {
+    res.status(400).json({ error: 'Price must be a numeric string' });
+    return;
+  }
+
+  if (typeof description !== 'string') {
+    res.status(400).json({ error: 'Description must be a string' });
+    return;
+  }
+
   const result = await query(
     'INSERT INTO products (name, price, description) VALUES ($1, $2, $3) RETURNING *',
     [name, price, description]
