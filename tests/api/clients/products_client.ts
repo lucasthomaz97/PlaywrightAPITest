@@ -22,9 +22,16 @@ export class ProductsClient {
         }
     }
 
-    async getProducts(request: APIRequestContext) {
+    async getProducts() {
         const start = Date.now();
-        const response = await request.get('/products');
+        const response = await this.request.get('/products');
+        const duration = Date.now() - start;
+        return { response, duration };
+    }
+
+    async getProductById(productId: any) {
+        const start = Date.now();
+        const response = await this.request.get(`/products/${productId}`);
         const duration = Date.now() - start;
         return { response, duration };
     }

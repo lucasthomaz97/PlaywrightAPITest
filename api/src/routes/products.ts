@@ -10,8 +10,14 @@ router.get('/', async (_req: Request, res: Response) => {
 
 router.get('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await query('SELECT * FROM products WHERE id = $1', [id]);
 
+  if (id === undefined || isNaN(Number(id))) {
+    res.status(400).json({ error: 'Invalid product ID' });
+    return;
+  }
+
+  const result = await query('SELECT * FROM products WHERE id = $1', [id]);
+  
   if (result.rows.length === 0) {
     res.status(404).json({ error: 'Product not found' });
     return;
