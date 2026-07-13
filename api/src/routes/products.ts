@@ -11,7 +11,7 @@ router.get('/', async (_req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  if (id === undefined || isNaN(Number(id))) {
+  if (id === undefined || isNaN(Number(id)) || Number(id) < 0 || id === '' || id.includes('.')) {
     res.status(400).json({ error: 'Invalid product ID' });
     return;
   }
@@ -61,7 +61,7 @@ router.put('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, price, description } = req.body;
 
-  if (id === undefined || isNaN(Number(id))) {
+  if (id === undefined || isNaN(Number(id)) || id.includes('.')) {
     res.status(400).json({ error: 'Invalid product ID' });
     return;
   }
@@ -120,7 +120,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 
 router.delete('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
-  if (id === undefined || isNaN(Number(id)) || Number(id) < 0 || id === '') {
+  if (id === undefined || isNaN(Number(id)) || Number(id) < 0 || id === '' || id.includes('.')) {
     res.status(400).json({ error: 'Invalid product ID' });
     return;
   }
