@@ -22,13 +22,10 @@ test.describe('GET Products - empty', () => {
 });
 
 test.describe('GET Products', () => {
-    let productId: number;
-
     test.beforeAll(async ({ request }) => {
         const productsClient: ProductsClient = new ProductsClient(request);
         const response = await productsClient.addProduct();
         const product = await response.json();
-        productId = product.id;
     });
 
     test('should return a list of products', async ( { request }) => {
@@ -87,7 +84,9 @@ test.describe('GET Product by ID', () => {
     const errorCasesTests = [
         {"scenario": "should return 404 for a non-existent product ID", "productId": 999999999, "errorCode": 404, "expectedError": { error: 'Product not found' }},
         {"scenario": "should return 400 for an invalid product ID", "productId": 'invalid-id', "errorCode": 400, "expectedError": { error: 'Invalid product ID' }},
-        {"scenario": "should return 404 for a negative product ID", "productId": -1, "errorCode": 404, "expectedError": { error: 'Product not found' }},
+        {"scenario": "should return 400 for a negative product ID", "productId": -1, "errorCode": 400, "expectedError": { error: 'Invalid product ID' }},
+        {"scenario": "should return 400 for a decimal ID", "productId": 1.5, "errorCode": 400, "expectedError": { error: 'Invalid product ID' }},
+        {"scenario": "should return 400 for an special character ID", "productId": '@', "errorCode": 400, "expectedError": { error: 'Invalid product ID' }},
     ];
 
     errorCasesTests.forEach(({ scenario, productId, errorCode, expectedError }) => {
