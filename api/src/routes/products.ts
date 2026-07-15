@@ -61,7 +61,7 @@ router.put('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, price, description } = req.body;
 
-  if (id === undefined || isNaN(Number(id)) || id.includes('.') || Number(id) < 0) {
+  if (id === undefined || isNaN(Number(id)) || id.includes('.') || Number(id) <= 0) {
     res.status(400).json({ error: 'Invalid product ID' });
     return;
   }
