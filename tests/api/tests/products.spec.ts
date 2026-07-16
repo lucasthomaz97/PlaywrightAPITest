@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { ProductsClient } from '../clients/products_client';
 import { Product } from '../models/Product';
 import { expectCorrectResponse } from '../helpers/response_helper';
-import { expectCorrectData } from '../helpers/product_helper';
+import { expectCorrectProductData } from '../helpers/product_helper';
 
 test.describe('GET Products - empty', () => {
     test.beforeAll(async ({ request }) => {
@@ -47,7 +47,7 @@ test.describe('GET Products', () => {
                 })
             );
 
-            expectCorrectData(product);
+            expectCorrectProductData(product);
         });
     });
 });
@@ -78,7 +78,7 @@ test.describe('GET Product by ID', () => {
             })
         );
 
-        expectCorrectData(product);
+        expectCorrectProductData(product);
     });
 
     const errorCasesTests = [

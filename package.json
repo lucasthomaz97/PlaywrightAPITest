@@ -12,7 +12,8 @@
     "test:get-product-by-id": "playwright test --grep \"GET Product by ID\"",
     "test:post-product": "playwright test --grep \"POST Product\"",
     "test:put-product": "playwright test --grep \"PUT Product\"",
-    "test:delete-product": "playwright test --grep \"DELETE Product\""
+    "test:delete-product": "playwright test --grep \"DELETE Product\"",
+    "test:get-user": "playwright test --grep \"GET users\""
   },
   "author": "Lucas Thomaz",
   "license": "ISC",
