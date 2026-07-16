@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import productsRouter from './routes/products';
 import usersRouter from './routes/users';
 import { initDb } from './db';
@@ -18,6 +18,11 @@ app.get('/', (_req, res) => {
 
 app.use((_req, res) => {
   res.status(404).json({ error: 'Route not found' });
+});
+
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 initDb()
