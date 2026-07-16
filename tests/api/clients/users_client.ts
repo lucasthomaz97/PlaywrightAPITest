@@ -12,13 +12,20 @@ export class UsersClient {
             }
         });
         const duration = Date.now() - start;
-        return {response, duration};
+        return { response, duration };
     }
 
     async getUserById(userId: any) {
         const start = Date.now();
         const response = await this.request.get(`/users/${userId}`);
         const duration = Date.now() - start;
-        return {response, duration};
+        return { response, duration };
+    }
+
+    async deleteUser(userId: any) {
+        const start = Date.now();
+        const response = await this.request.delete(`/users/${userId}`);
+        const duration = Date.now() - start;
+        return { response, duration };
     }
 }
