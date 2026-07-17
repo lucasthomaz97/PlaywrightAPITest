@@ -117,16 +117,124 @@ test.describe('POST users', () => {
     });
 });
 
-//
-// PUT /:id
-//   - 200: Update user successfully
-//   - 400: Invalid user ID
-//   - 400: At least name or email must be provided
-//   - 400: Name must be a string
-//   - 400: Email must be a valid email string
-//   - 404: User not found
-//   - 409: Email already exists (unique constraint violation - 23505)
-//
+test.describe('PUT users', () => {
+    let userId: number;
+    let userName: String;
+    let userEmail: String;
+
+    test.beforeEach( async({ request }) => {
+        const usersClient: UsersClient = new UsersClient(request);
+        const {response, duration} = await usersClient.createUser('User to Edit', usersClient.generateEmail());
+        const user = await response.json();
+        userId = user.id;
+        userName = user.name;
+        userEmail = user.email;
+    });
+
+    test('should update an user sucessfully', async({ request }) => {
+        const usersClient: UsersClient = new UsersClient(request);
+        const userData = {name: 'Edited User', email: usersClient.generateEmail()};
+        const { response, duration } = await usersClient.editUser(userId, {"data": userData});
+        const edited = await response.json();
+
+        expectCorrectResponse(response, 200, duration);
+        expect(edited).toEqual(expect.objectContaining({
+            id: userId,
+            name: userData.name,
+            email: userData.email,
+            created_at: expect.any(String)
+        }));
+        expectCorrectUserData(edited);
+    });
+
+    test('should update only the user name sucessfully', async({ request }) => {
+        const usersClient: UsersClient = new UsersClient(request);
+        const userData = {name: 'Edited User'};
+        const { response, duration } = await usersClient.editUser(userId, {"data": userData});
+        const edited = await response.json();
+
+        expectCorrectResponse(response, 200, duration);
+        expect(edited).toEqual(expect.objectContaining({
+            id: userId,
+            name: userData.name,
+            email: expect.any(String),
+            created_at: expect.any(String)
+        }));
+        expectCorrectUserData(edited);
+    });
+
+    test('should update only the user email sucessfully', async({ request }) => {
+        const usersClient: UsersClient = new UsersClient(request);
+        const userData = {email: usersClient.generateEmail()};
+        const { response, duration } = await usersClient.editUser(userId, {"data": userData});
+        const edited = await response.json();
+
+        expectCorrectResponse(response, 200, duration);
+        expect(edited).toEqual(expect.objectContaining({
+            id: userId,
+            name: expect.any(String),
+            email: userData.email,
+            created_at: expect.any(String)
+        }));
+        expectCorrectUserData(edited);
+    });
+
+    test('should return 409 when editing an user email to one already in use by another user', async ({ request }) => {
+        const usersClient: UsersClient = new UsersClient(request);
+        const {response, duration} = await usersClient.createUser('User Using Email', usersClient.generateEmail());
+        const user = await response.json();
+
+        const data = {name: 'Edited User', email: user.email};
+        const { response: editResponse, duration: editDuration } = await usersClient.editUser(userId, {"data": data});
+        const edited = await editResponse.json();
+
+        expectCorrectResponse(editResponse, 409, editDuration);
+        expect(edited).toEqual({"error": "Email already exists"});
+    });
+
+    test('should not change user data when an error 409 occurs', async ({ request }) => {
+        const usersClient: UsersClient = new UsersClient(request);
+        const {response, duration} = await usersClient.createUser('User to Edit', usersClient.generateEmail());
+        const user = await response.json();
+
+        const data = {name: 'Edited User', email: user.email};
+        const { response: editResponse, duration: editDuration } = await usersClient.editUser(userId, {"data": data});
+        const edited = await editResponse.json();
+
+        expectCorrectResponse(editResponse, 409, editDuration);
+        expect(edited).toEqual({"error": "Email already exists"});
+
+        const {response: getResponse, duration:getDuration} = await usersClient.getUserById(userId);
+        const userData = await getResponse.json();
+        expect(userData.name).toEqual(userName);
+        expect(userData.email).toEqual(userEmail);
+    })
+
+    const testCases = [
+        {"scenario": "should return 400 when trying to edit with no fields", "id": null, "data": {}, "code": 400, "error": {"error": "At least name or email must be provided"}},
+        {"scenario": "should return 400 when trying to edit with empty fields", "id": null, "data": {"name": "", "email": ""}, "code": 400, "error": {"error": "At least name or email must be provided"}},
+        {"scenario": "should return 400 when trying to edit an user with an invalid id", "id": "invalid-id", "data": {"name": "Edited User", "email": `put_test${Date.now()}@example.com`}, "code": 400, "error": {"error": "Invalid user ID"}},
+        {"scenario": "should return 400 when trying to edit an user with a decimal id", "id": 1.5, "data": {"name": "Edited User", "email": `put_test${Date.now()}@example.com`}, "code": 400, "error": {"error": "Invalid user ID"}},
+        {"scenario": "should return 400 when trying to edit an user with a negative id", "id": -1, "data": {"name": "Edited User", "email": `put_test${Date.now()}@example.com`}, "code": 400, "error": {"error": "Invalid user ID"}},
+        {"scenario": "should return 400 when trying to edit an user with id 0", "id": 0, "data": {"name": "Edited User", "email": `put_test${Date.now()}@example.com`}, "code": 400, "error": {"error": "Invalid user ID"}},
+        {"scenario": "should return 404 when user is not found with this id", "id": 999999999, "data": {"name": "Edited User", "email": `put_test${Date.now()}@example.com`}, "code": 404, "error": {"error": "User not found"}},
+        {"scenario": "should return 400 when name is a number", "id": null, "data": {"name": 2026, "email": `put_test${Date.now()}@example.com`}, "code": 400, "error": {"error": "Name must be a string"}},
+        {"scenario": "should return 400 when email is a number", "id": null, "data": {"name": "Edited User", "email": 2026}, "code": 400, "error": {"error": "Email must be a valid email string"}},
+        {"scenario": "should return 400 when email is not valid", "id": null, "data": {"name": "Edited User", "email": 'pretend_to_be_email'}, "code": 400, "error": {"error": "Email must be a valid email string"}}
+    ]
+
+    testCases.forEach(({ scenario, id, data, code, error}) => {
+        test(scenario, async ({ request }) => {
+            const usrId = id ?? userId;
+            const usersClient: UsersClient = new UsersClient(request);
+            const { response, duration } = await usersClient.editUser(usrId, {"data": data});
+            const res = await response.json();
+
+            expectCorrectResponse(response, code, duration);
+            expect(res).toEqual(error);
+        });
+    });
+});
 
 test.describe('DELETE users', () => {
     let userId: number;

@@ -32,4 +32,12 @@ export class UsersClient {
         const duration = Date.now() - start;
         return { response, duration };
     }
+
+    async editUser(userId: any, body: {}) {
+        const start = Date.now();
+        const response = await this.request.put(`/users/${userId}`, body);
+        const duration = Date.now() - start;
+
+        return { response, duration };
+    }
 }
