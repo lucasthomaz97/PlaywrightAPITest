@@ -2,16 +2,13 @@ import { test, expect } from '@playwright/test';
 import { expectCorrectResponse } from '../helpers/response_helper';
 import { UsersClient } from '../clients/users_client';
 import { expectCorrectUserData } from '../helpers/user_helper';
-import { User } from '../models/User';
-
-// TODO: Write tests for the following user API validations:
 
 test.describe('GET users', () => {
     let userId: number;
 
     test.beforeAll( async ({request}) => {
         const usersClient: UsersClient = new UsersClient(request);
-        const {response, duration} = await usersClient.createUser();
+        const {response, duration} = await usersClient.createUser('Test User' ,usersClient.generateEmail());
         const user = await response.json();
         userId = user.id;
     });
@@ -52,13 +49,74 @@ test.describe('GET users', () => {
     });
 });
 
-// POST /
-//   - 201: Create user successfully
-//   - 400: Missing name or email
-//   - 400: Name must be a string
-//   - 400: Email must be a valid email string
-//   - 409: Email already exists (unique constraint violation - 23505)
-//   - 500: Internal server error on unexpected DB failures
+test.describe('POST users', () => {
+    test('should create an user sucessfully', async({ request })=>{
+        const usersClient: UsersClient = new UsersClient(request);
+        const userData = {
+            name: 'New User', email: usersClient.generateEmail()
+        }
+        const { response, duration } = await usersClient.createUser(userData.name, userData.email);
+        const user = await response.json();
+
+        expectCorrectResponse(response, 201, duration);
+        expect(user).toEqual(expect.objectContaining({
+            id: expect.any(Number),
+            name: userData.name,
+            email: userData.email,
+            created_at: expect.any(String)
+        }));
+        expectCorrectUserData(user);
+    });
+
+    test('should return 409 when creating an user with an email already in use', async({ request }) => {
+        const usersClient: UsersClient = new UsersClient(request);
+        const userData = {
+            name: 'New User', email: usersClient.generateEmail()
+        }
+        const { response, duration } = await usersClient.createUser(userData.name, userData.email);
+        const user = await response.json();
+
+        expectCorrectResponse(response, 201, duration);
+        expect(user).toEqual(expect.objectContaining({
+            id: expect.any(Number),
+            name: userData.name,
+            email: userData.email,
+            created_at: expect.any(String)
+        }));
+        expectCorrectUserData(user);
+
+        const {response: secondResponse, duration: secondDuration} = await usersClient.createUser(userData.name, userData.email);
+        const error = await secondResponse.json();
+
+        expectCorrectResponse(secondResponse, 409, secondDuration);
+        expect(error).toEqual({"error": "Email already exists"});
+
+    });
+
+    const testCases = [
+        {"scenario": "should return 400 when trying to create an user with empty fields", "data": {name: "", "email": ""}, "code": 400, "error": {"error": "Name and email are required"}},
+        {"scenario": "should return 400 when trying to create an user with no fields", "data": {}, "code": 400, "error": {"error": "Name and email are required"}},
+        {"scenario": "should return 400 when trying to create an user with empty name", "data": {name: "", "email": `post_test${Date.now()}@example.com`}, "code": 400, "error": {"error": "Name and email are required"}},
+        {"scenario": "should return 400 when trying to create an user with no name field", "data": {"email": `post_test${Date.now()}@example.com`}, "code": 400, "error": {"error": "Name and email are required"}},
+        {"scenario": "should return 400 when trying to create an user with a numeric value in the name field", "data": {name: 2026, "email": `post_test${Date.now()}@example.com`}, "code": 400, "error": {"error": 'Name must be a string'}},
+        {"scenario": "should return 400 when trying to create an user with empty email", "data": {name: "Post Tests", "email": ""}, "code": 400, "error": {"error": "Name and email are required"}},
+        {"scenario": "should return 400 when trying to create an user with no email field", "data": {name: "Post Tests"}, "code": 400, "error": {"error": "Name and email are required"}},
+        {"scenario": "should return 400 when trying to create an user with a numeric value in the email field", "data": {name: "Post Tests", "email": 2026}, "code": 400, "error": {"error": "Email must be a valid email string"}},
+        {"scenario": "should return 400 when trying to create an user with an invalid email string in the email field", "data": {name: "Post Tests", "email": "pretend_to_be_email"}, "code": 400, "error": {"error": "Email must be a valid email string"}}
+    ]
+
+    testCases.forEach(({ scenario, data, code, error}) => {
+        test(scenario, async ({ request }) => {
+            const usersClient: UsersClient = new UsersClient(request);
+            const {response, duration} = await usersClient.createUser(data.name, data.email);
+            const ret = await response.json()
+
+            expectCorrectResponse(response, code, duration);
+            expect(ret).toEqual(error);
+        });
+    });
+});
+
 //
 // PUT /:id
 //   - 200: Update user successfully
@@ -68,21 +126,14 @@ test.describe('GET users', () => {
 //   - 400: Email must be a valid email string
 //   - 404: User not found
 //   - 409: Email already exists (unique constraint violation - 23505)
-//   - 500: Internal server error on unexpected DB failures
 //
-// DELETE /:id
-//   - 200: Delete user successfully
-//   - 400: Invalid user ID
-//   - 404: User not found
-//   - 409: Cannot delete user with associated orders (FK violation - 23503)
-//   - 500: Internal server error on unexpected DB failures
 
 test.describe('DELETE users', () => {
     let userId: number;
 
     test.beforeAll( async({ request }) => {
         const usersClient: UsersClient = new UsersClient(request);
-        const {response, duration} = await usersClient.createUser();
+        const {response, duration} = await usersClient.createUser('User to Delete', usersClient.generateEmail());
         const user = await response.json();
         userId = user.id;
     });
@@ -109,7 +160,7 @@ test.describe('DELETE users', () => {
     test('should return a 404 when trying to delete an user for the second time', async ({ request }) => {
         const usersClient: UsersClient = new UsersClient(request);
 
-        const {response: createRes, duration: createDuration} = await usersClient.createUser();
+        const {response: createRes, duration: createDuration} = await usersClient.createUser('User To Delete', usersClient.generateEmail());
         const user = await createRes.json();
         const newUserId = user.id;
 

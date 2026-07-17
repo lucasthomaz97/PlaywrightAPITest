@@ -3,12 +3,16 @@ import { APIRequestContext } from '@playwright/test';
 export class UsersClient {
     constructor(private request: APIRequestContext) {}
 
-    async createUser() {
+    generateEmail() {
+        return `test_${Date.now()}@example.com`;
+    }
+
+    async createUser(name: any, email: any) {
         const start = Date.now()
         const response = await this.request.post('/users', {
             data: {
-                'name': 'Test User',
-                'email': `test_${start}@example.com`
+                'name': name,
+                'email': email
             }
         });
         const duration = Date.now() - start;
