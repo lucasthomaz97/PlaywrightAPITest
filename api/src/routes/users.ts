@@ -16,7 +16,7 @@ router.post('/', async (req: Request, res: Response) => {
     return;
   }
 
-  if (typeof email !== 'string' || !email.includes('@')) {
+  if (typeof email !== 'string' || !email.includes('@') || !email.includes('.com')) {
     res.status(400).json({ error: 'Email must be a valid email string' });
     return;
   }
