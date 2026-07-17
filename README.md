@@ -6,9 +6,9 @@
 
 ## English <a id="english"></a>
 
-Automated API test suite using [Playwright](https://playwright.dev) to test an Express + PostgreSQL REST API for products and users.
+This project is first and foremost a **study on API testing with Playwright**. The API itself is intentionally minimal — a basic Express + PostgreSQL scaffold built solely to give the tests something to run against. The real focus is the test suite, not the API.
 
-The API is a study project located in the `api/` directory — see its [README](api/README.md) for setup and endpoint details.
+The API lives in the `api/` directory — see its [README](api/README.md) for setup and endpoint details.
 
 ## Prerequisites
 
@@ -88,9 +88,9 @@ Each test validates:
 
 ## Português <a id="portugues"></a>
 
-Suíte de testes automatizados de API usando [Playwright](https://playwright.dev) para testar uma API REST com Express + PostgreSQL para produtos e usuários.
+Este projeto é, antes de tudo, um **estudo sobre testes de API com Playwright**. A API é intencionalmente mínima — um scaffold básico com Express + PostgreSQL criado apenas para dar aos testes algo onde rodar. O foco real é a suíte de testes, não a API.
 
-A API é um projeto de estudo localizado em `api/` — veja o [README](api/README.md) da API para detalhes de configuração e endpoints.
+A API está no diretório `api/` — veja o [README](api/README.md) para detalhes de configuração e endpoints.
 
 ## Pré-requisitos
 
@@ -163,11 +163,3 @@ Cada teste valida:
 - **Helpers** (`tests/api/helpers/`) — asserções reutilizáveis para respostas, usuários e produtos
 - **Models** (`tests/api/models/`) — interfaces TypeScript para `Product` e `User`
 - **Tests** (`tests/api/tests/`) — specs do Playwright organizados por método HTTP
-
----
-
-Now write the file.</think>
-
-<｜DSML｜tool_calls>
-<｜DSML｜invoke name="write">
-<｜DSML｜parameter name="filePath" string="true">C:\Users\lucas\OneDrive\Documentos\Not games Projects\QA Study\PlaywrightAPITest\README.md
