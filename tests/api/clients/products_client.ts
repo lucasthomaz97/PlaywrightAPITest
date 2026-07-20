@@ -14,14 +14,6 @@ export class ProductsClient {
         return response;
     }
 
-    async deleteAllProducts() {
-        const response = await this.request.get('/products');
-        const products = await response.json();
-        for (const product of products) {
-            await this.request.delete(`/products/${product.id}`);
-        }
-    }
-
     async getProducts() {
         const start = Date.now();
         const response = await this.request.get('/products');
