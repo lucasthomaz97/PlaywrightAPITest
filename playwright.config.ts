@@ -8,5 +8,6 @@ export default defineConfig({
    reporter: [
     ['html'],
     ['list']
-  ]
+  ],
+  globalTeardown: './tests/api/helpers/teardown_helper.ts'
 });

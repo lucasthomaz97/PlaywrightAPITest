@@ -7,7 +7,6 @@
     "server": "npx tsx api/src/server.ts",
     "report": "playwright show-report",
     "test": "playwright test",
-    "test:empty-list": "playwright test --grep \"GET Products - empty\"",
     "test:get-products": "playwright test --grep \"GET Products\"",
     "test:get-product-by-id": "playwright test --grep \"GET Product by ID\"",
     "test:post-product": "playwright test --grep \"POST Product\"",
