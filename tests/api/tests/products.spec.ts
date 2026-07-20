@@ -18,7 +18,6 @@ test.describe('GET Products - empty', () => {
         expectCorrectResponse(response, 200, duration);
         expect(products).toEqual([]);
     });
-
 });
 
 test.describe('GET Products', () => {
@@ -114,12 +113,16 @@ test.describe('POST Product', () => {
         const product = await response.json();
 
         expectCorrectResponse(response, 201, duration);
-        expect(product.name).toBe(productData.name);
-        expect(product.price).toBe(productData.price);
-        expect(product.description).toBe(productData.description);
+        expect(product).toEqual({
+            id: expect.any(Number),
+            name: productData.name,
+            price: productData.price,
+            description: productData.description,
+            created_at: expect.any(String)
+        });
     });
 
-    const errorCasesTests = [
+    const testCases = [
         {"scenario": "should return 400 when creating a product with no fields", "productData": {}, "errorCode": 400, "expectedError": { error: 'Name and price are required' }},
         {"scenario": "should return 400 when creating a product with missing fields", "productData": { name: '', price: '', description: '' }, "errorCode": 400, "expectedError": { error: 'Name and price are required' }},
         {"scenario": "should return 400 when creating a product with no name", "productData": { name: '', price: '29.99', description: 'This is a new product' }, "errorCode": 400, "expectedError": { error: 'Name and price are required' }},
@@ -133,7 +136,7 @@ test.describe('POST Product', () => {
         {"scenario": "should create a new product with an empty description", "productData": { name: 'Product with empty description', price: '29.99', description: '' }, "errorCode":201, "expectedError": {id: expect.any(Number), name: expect.any(String), price: expect.any(String), description: expect.any(String), created_at: expect.any(String)}}
     ];
 
-    errorCasesTests.forEach(({ scenario, productData, errorCode, expectedError }) => {
+    testCases.forEach(({ scenario, productData, errorCode, expectedError }) => {
         test(scenario, async ( { request }) => {
             const productsClient: ProductsClient = new ProductsClient(request);
             const { response, duration } = await productsClient.postProduct(productData);
@@ -174,6 +177,31 @@ test.describe('PUT Product', () => {
             description: updatedProductData.description,
             created_at: expect.any(String)
         });
+    });
+
+    test('should keep data unchanged after failed update', async ({ request }) => {
+        const updatedProductData = {
+            name: 'Updated Product',
+            price: 39.99,
+            description: 'This is an updated product',
+        };
+        const productsClient: ProductsClient = new ProductsClient(request);
+
+        const { response: firstGetResponse, duration: firstGetDuration} = await productsClient.getProductById(productId);
+        const originalResponse = await firstGetResponse.json();
+        expectCorrectResponse(firstGetResponse, 200, firstGetDuration);
+
+        const { response, duration } = await productsClient.putProduct(productId, updatedProductData);
+        const updatedProduct = await response.json();
+        expectCorrectResponse(response, 400, duration);
+
+        expect(updatedProduct).toEqual({ error: 'Price must be a numeric string' });
+
+        const { response: lastGetResponse, duration: lastGetDuration} = await productsClient.getProductById(productId);
+        const lastResponse = await lastGetResponse.json();
+        expectCorrectResponse(lastGetResponse, 200, lastGetDuration);
+
+        expect(lastResponse).toEqual(originalResponse);
     });
 
     const errorCasesTests = [
